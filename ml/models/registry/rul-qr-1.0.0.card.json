@@ -1,0 +1,88 @@
+{
+  "model": "rul-qr",
+  "version": "1.0.0",
+  "window_cycles": 60,
+  "requirement": [
+    "PRD-01",
+    "NFR-10",
+    "NFR-11"
+  ],
+  "inputs": [
+    "margin_c",
+    "slope_per_100cyc",
+    "cycles_since_sv",
+    "resid_sd"
+  ],
+  "outputs": [
+    "rul_p10",
+    "rul_p50",
+    "rul_p90"
+  ],
+  "units": "cycles",
+  "training_data": {
+    "kind": "synthetic",
+    "seed": 20261030,
+    "rows": 8640,
+    "sha256": "1cdaccb0d5659256dfbf7a7026d5ed5d12ff52bdc2e42d60ff08b7e76773a828"
+  },
+  "method": "log-space linear quantile regression on a physics projection (margin headroom / wear rate)",
+  "evaluation": {
+    "holdout_rows": 2160,
+    "p50_mae_cycles": 1089.6,
+    "p50_mape_fast_wear": 0.786,
+    "p10_p90_coverage": 0.802,
+    "target_coverage": 0.8
+  },
+  "limitations": "Synthetic EGT-margin degradation only; not validated on operational data.",
+  "approval": {
+    "status": "pending",
+    "required_role": "safety_lead"
+  },
+  "onnx_sha256": "6f9266972de6714ccde518d87f6bbea63a785494070d9d10e3a8e546fabffed4",
+  "feature_deciles": {
+    "margin_c": [
+      -1.7313,
+      5.3063,
+      11.3037,
+      17.1222,
+      22.4927,
+      27.4294,
+      32.1688,
+      36.8031,
+      43.0025
+    ],
+    "slope_per_100cyc": [
+      -11.1228,
+      -5.2123,
+      -3.259,
+      -2.399,
+      -1.8241,
+      -1.3689,
+      -0.9464,
+      -0.4729,
+      0.169
+    ],
+    "cycles_since_sv": [
+      196.9,
+      356.0,
+      615.0,
+      982.6,
+      1465.0,
+      2036.4,
+      2758.9,
+      3759.2,
+      5374.0
+    ],
+    "resid_sd": [
+      0.7497,
+      0.9389,
+      1.1349,
+      1.3409,
+      1.5408,
+      1.7221,
+      1.8949,
+      2.0784,
+      2.2917
+    ]
+  }
+}

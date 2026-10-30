@@ -1,0 +1,7 @@
+target
+**/node_modules
+**/dist
+third_party
+.data
+.git
+libs/aips-signal/build

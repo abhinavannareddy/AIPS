@@ -1,0 +1,37 @@
+[
+  {
+    "name": "INT-01 Kafka ingest: a valid event reaches analysis and PostgreSQL",
+    "ok": true,
+    "ms": 1540
+  },
+  {
+    "name": "INT-01 duplicate delivery is ignored (idempotent by event id)",
+    "ok": true,
+    "ms": 516
+  },
+  {
+    "name": "DAT-06 malformed, wrong-schema and unknown-tail messages are rejected and counted",
+    "ok": true,
+    "ms": 2032
+  },
+  {
+    "name": "WRK-05 Temporal: one durable SLA workflow per open case (started from Kafka aips.cases)",
+    "ok": true,
+    "ms": 33
+  },
+  {
+    "name": "PRV-04 Temporal: pre-departure concerns start workflows; past-due ones escalate via aips-core",
+    "ok": true,
+    "ms": 53
+  },
+  {
+    "name": "Reliability: worker stops gracefully, misses nothing while down, and catches up on restart",
+    "ok": true,
+    "ms": 12675
+  },
+  {
+    "name": "Reliability: core restart resumes the Kafka consumer from committed offsets (no loss)",
+    "ok": true,
+    "ms": 5100
+  }
+]

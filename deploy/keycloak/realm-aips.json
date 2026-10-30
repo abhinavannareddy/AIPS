@@ -1,0 +1,345 @@
+{
+  "realm": "aips",
+  "enabled": true,
+  "displayName": "AIPS",
+  "sslRequired": "external",
+  "registrationAllowed": false,
+  "accessTokenLifespan": 300,
+  "ssoSessionIdleTimeout": 1800,
+  "ssoSessionMaxLifespan": 36000,
+  "revokeRefreshToken": true,
+  "refreshTokenMaxReuse": 0,
+  "bruteForceProtected": true,
+  "failureFactor": 5,
+  "permanentLockout": false,
+  "maxFailureWaitSeconds": 900,
+  "passwordPolicy": "length(14) and upperCase(1) and lowerCase(1) and digits(1) and specialChars(1) and notUsername and passwordHistory(5)",
+  "otpPolicyType": "totp",
+  "otpPolicyAlgorithm": "HmacSHA256",
+  "otpPolicyDigits": 6,
+  "otpPolicyPeriod": 30,
+  "roles": {
+    "realm": [
+      {
+        "name": "engineer",
+        "description": "AIPS role engineer"
+      },
+      {
+        "name": "mcc_controller",
+        "description": "AIPS role mcc_controller"
+      },
+      {
+        "name": "flight_ops",
+        "description": "AIPS role flight_ops"
+      },
+      {
+        "name": "safety_manager",
+        "description": "AIPS role safety_manager"
+      },
+      {
+        "name": "cabin_crew",
+        "description": "AIPS role cabin_crew"
+      },
+      {
+        "name": "lessor",
+        "description": "AIPS role lessor"
+      },
+      {
+        "name": "admin",
+        "description": "AIPS role admin"
+      }
+    ]
+  },
+  "clientScopes": [
+    {
+      "name": "aips-api-audience",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "false"
+      },
+      "protocolMappers": [
+        {
+          "name": "aips-api audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "config": {
+            "included.client.audience": "aips-api",
+            "access.token.claim": "true",
+            "id.token.claim": "false"
+          }
+        },
+        {
+          "name": "org",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "config": {
+            "user.attribute": "org",
+            "claim.name": "org",
+            "access.token.claim": "true",
+            "jsonType.label": "String"
+          }
+        },
+        {
+          "name": "realm roles",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-realm-role-mapper",
+          "consentRequired": false,
+          "config": {
+            "multivalued": "true",
+            "claim.name": "realm_access.roles",
+            "jsonType.label": "String",
+            "access.token.claim": "true",
+            "id.token.claim": "false",
+            "userinfo.token.claim": "false",
+            "introspection.token.claim": "true"
+          }
+        },
+        {
+          "name": "username",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "username",
+            "claim.name": "preferred_username",
+            "jsonType.label": "String",
+            "access.token.claim": "true",
+            "id.token.claim": "true",
+            "userinfo.token.claim": "true",
+            "introspection.token.claim": "true"
+          }
+        },
+        {
+          "name": "sub",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-sub-mapper",
+          "consentRequired": false,
+          "config": {
+            "access.token.claim": "true",
+            "introspection.token.claim": "true"
+          }
+        }
+      ]
+    }
+  ],
+  "clients": [
+    {
+      "clientId": "aips-command",
+      "name": "AIPS Command",
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "redirectUris": [
+        "http://localhost:8090/*",
+        "http://localhost:5173/*"
+      ],
+      "webOrigins": [
+        "http://localhost:8090",
+        "http://localhost:5173"
+      ],
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "http://localhost:8090/*"
+      },
+      "defaultClientScopes": [
+        "profile",
+        "roles",
+        "aips-api-audience"
+      ]
+    },
+    {
+      "clientId": "aips-api",
+      "name": "AIPS API (audience)",
+      "bearerOnly": true,
+      "publicClient": false
+    },
+    {
+      "clientId": "aips-workflow",
+      "name": "AIPS workflow worker",
+      "publicClient": false,
+      "serviceAccountsEnabled": true,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "secret": "aips-dev-workflow-secret",
+      "defaultClientScopes": [
+        "roles",
+        "aips-api-audience"
+      ]
+    }
+  ],
+  "users": [
+    {
+      "username": "demo.engineer",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Demo",
+      "lastName": "Engineer",
+      "email": "demo.engineer@example.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "ChangeMe-Dev-Only-1!",
+          "temporary": true
+        }
+      ],
+      "realmRoles": [
+        "engineer"
+      ],
+      "requiredActions": [
+        "UPDATE_PASSWORD",
+        "CONFIGURE_TOTP"
+      ],
+      "attributes": {}
+    },
+    {
+      "username": "demo.mcc_controller",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Demo",
+      "lastName": "Mcc Controller",
+      "email": "demo.mcc_controller@example.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "ChangeMe-Dev-Only-1!",
+          "temporary": true
+        }
+      ],
+      "realmRoles": [
+        "mcc_controller"
+      ],
+      "requiredActions": [
+        "UPDATE_PASSWORD",
+        "CONFIGURE_TOTP"
+      ],
+      "attributes": {}
+    },
+    {
+      "username": "demo.flight_ops",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Demo",
+      "lastName": "Flight Ops",
+      "email": "demo.flight_ops@example.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "ChangeMe-Dev-Only-1!",
+          "temporary": true
+        }
+      ],
+      "realmRoles": [
+        "flight_ops"
+      ],
+      "requiredActions": [
+        "UPDATE_PASSWORD",
+        "CONFIGURE_TOTP"
+      ],
+      "attributes": {}
+    },
+    {
+      "username": "demo.safety_manager",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Demo",
+      "lastName": "Safety Manager",
+      "email": "demo.safety_manager@example.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "ChangeMe-Dev-Only-1!",
+          "temporary": true
+        }
+      ],
+      "realmRoles": [
+        "safety_manager"
+      ],
+      "requiredActions": [
+        "UPDATE_PASSWORD",
+        "CONFIGURE_TOTP"
+      ],
+      "attributes": {}
+    },
+    {
+      "username": "demo.cabin_crew",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Demo",
+      "lastName": "Cabin Crew",
+      "email": "demo.cabin_crew@example.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "ChangeMe-Dev-Only-1!",
+          "temporary": true
+        }
+      ],
+      "realmRoles": [
+        "cabin_crew"
+      ],
+      "requiredActions": [
+        "UPDATE_PASSWORD",
+        "CONFIGURE_TOTP"
+      ],
+      "attributes": {}
+    },
+    {
+      "username": "demo.lessor",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Demo",
+      "lastName": "Lessor",
+      "email": "demo.lessor@example.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "ChangeMe-Dev-Only-1!",
+          "temporary": true
+        }
+      ],
+      "realmRoles": [
+        "lessor"
+      ],
+      "requiredActions": [
+        "UPDATE_PASSWORD",
+        "CONFIGURE_TOTP"
+      ],
+      "attributes": {
+        "org": [
+          "Aurora Aviation Capital"
+        ]
+      }
+    },
+    {
+      "username": "demo.admin",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Demo",
+      "lastName": "Admin",
+      "email": "demo.admin@example.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "ChangeMe-Dev-Only-1!",
+          "temporary": true
+        }
+      ],
+      "realmRoles": [
+        "admin"
+      ],
+      "requiredActions": [
+        "UPDATE_PASSWORD",
+        "CONFIGURE_TOTP"
+      ],
+      "attributes": {}
+    },
+    {
+      "username": "service-account-aips-workflow",
+      "enabled": true,
+      "serviceAccountClientId": "aips-workflow",
+      "realmRoles": [
+        "mcc_controller"
+      ]
+    }
+  ]
+}

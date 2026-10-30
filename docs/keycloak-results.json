@@ -1,0 +1,26 @@
+[
+  {
+    "name": "service identity: client-credentials token is accepted with its realm role only",
+    "ok": true
+  },
+  {
+    "name": "missing, forged and dev-header credentials are rejected (401)",
+    "ok": true
+  },
+  {
+    "name": "token from another issuer (Keycloak master realm) is rejected",
+    "ok": true
+  },
+  {
+    "name": "direct password grant is disabled for the UI client (no password-only login path)",
+    "ok": true
+  },
+  {
+    "name": "browser login (code + PKCE): temporary password change and mandatory TOTP enrolment",
+    "ok": true
+  },
+  {
+    "name": "second login requires the TOTP code; a wrong code is refused",
+    "ok": true
+  }
+]

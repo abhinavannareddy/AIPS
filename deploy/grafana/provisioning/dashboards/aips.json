@@ -1,0 +1,147 @@
+{
+ "title": "AIPS operations",
+ "uid": "aips-ops",
+ "schemaVersion": 39,
+ "panels": [
+  {
+   "id": 1,
+   "type": "timeseries",
+   "title": "Analysis pass (ms)",
+   "gridPos": {
+    "x": 0,
+    "y": 0,
+    "w": 6,
+    "h": 8
+   },
+   "targets": [
+    {
+     "expr": "aips_recompute_milliseconds",
+     "refId": "A"
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "type": "timeseries",
+   "title": "Alerts",
+   "gridPos": {
+    "x": 6,
+    "y": 0,
+    "w": 6,
+    "h": 8
+   },
+   "targets": [
+    {
+     "expr": "aips_alerts",
+     "refId": "A"
+    }
+   ]
+  },
+  {
+   "id": 3,
+   "type": "timeseries",
+   "title": "Open cases",
+   "gridPos": {
+    "x": 12,
+    "y": 0,
+    "w": 6,
+    "h": 8
+   },
+   "targets": [
+    {
+     "expr": "aips_cases_open",
+     "refId": "A"
+    }
+   ]
+  },
+  {
+   "id": 4,
+   "type": "timeseries",
+   "title": "Escalated cases",
+   "gridPos": {
+    "x": 18,
+    "y": 0,
+    "w": 6,
+    "h": 8
+   },
+   "targets": [
+    {
+     "expr": "aips_cases_escalated",
+     "refId": "A"
+    }
+   ]
+  },
+  {
+   "id": 5,
+   "type": "timeseries",
+   "title": "Detection recall",
+   "gridPos": {
+    "x": 0,
+    "y": 8,
+    "w": 6,
+    "h": 8
+   },
+   "targets": [
+    {
+     "expr": "aips_detection_recall",
+     "refId": "A"
+    }
+   ]
+  },
+  {
+   "id": 6,
+   "type": "timeseries",
+   "title": "Active emergency drills",
+   "gridPos": {
+    "x": 6,
+    "y": 8,
+    "w": 6,
+    "h": 8
+   },
+   "targets": [
+    {
+     "expr": "aips_emergency_active",
+     "refId": "A"
+    }
+   ]
+  },
+  {
+   "id": 7,
+   "type": "timeseries",
+   "title": "Audit entries",
+   "gridPos": {
+    "x": 12,
+    "y": 8,
+    "w": 6,
+    "h": 8
+   },
+   "targets": [
+    {
+     "expr": "aips_audit_entries",
+     "refId": "A"
+    }
+   ]
+  },
+  {
+   "id": 8,
+   "type": "timeseries",
+   "title": "Live UI streams",
+   "gridPos": {
+    "x": 18,
+    "y": 8,
+    "w": 6,
+    "h": 8
+   },
+   "targets": [
+    {
+     "expr": "aips_sse_subscribers",
+     "refId": "A"
+    }
+   ]
+  }
+ ],
+ "time": {
+  "from": "now-1h",
+  "to": "now"
+ }
+}

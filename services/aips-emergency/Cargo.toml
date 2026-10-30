@@ -1,0 +1,22 @@
+[package]
+name = "aips-emergency"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+aips-domain = { path = "../../crates/aips-domain" }
+aips-platform = { path = "../../crates/aips-platform" }
+anyhow.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+chrono.workspace = true
+uuid.workspace = true
+parking_lot.workspace = true
+tokio.workspace = true
+tokio-stream.workspace = true
+futures.workspace = true
+axum.workspace = true
+tower-http.workspace = true
+tracing.workspace = true
+rand.workspace = true
+sqlx.workspace = true

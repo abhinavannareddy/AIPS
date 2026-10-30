@@ -1,0 +1,143 @@
+# AIPS CI: build, test, scan, SBOM, sign. Supply-chain steps follow SLSA build provenance and
+# Sigstore keyless signing. Protect the main branch: require this workflow and code review.
+name: ci
+on:
+  push: { branches: [main] }
+  pull_request:
+permissions:
+  contents: read
+
+env:
+  ORT_VERSION: 1.20.1
+
+jobs:
+  rust:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y cmake libcurl4-openssl-dev libsasl2-dev zlib1g-dev
+      - run: mkdir -p third_party && curl -fsSL https://github.com/microsoft/onnxruntime/releases/download/v${ORT_VERSION}/onnxruntime-linux-x64-${ORT_VERSION}.tgz | tar xz -C third_party
+      - uses: dtolnay/rust-toolchain@stable
+        with: { components: clippy, rustfmt }
+      - run: cargo fmt --all -- --check
+      - run: cargo clippy --release --all-targets -- -D warnings
+      - run: cargo test --release --workspace
+      - run: cargo install cargo-audit --locked && cargo audit
+      - run: cargo install cargo-cyclonedx --locked && cargo cyclonedx --format json
+      - uses: actions/upload-artifact@v4
+        with: { name: sbom-rust, path: "**/*.cdx.json" }
+
+  cpp:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: mkdir -p third_party && curl -fsSL https://github.com/microsoft/onnxruntime/releases/download/v${ORT_VERSION}/onnxruntime-linux-x64-${ORT_VERSION}.tgz | tar xz -C third_party
+      - name: Build and test with AddressSanitizer and UndefinedBehaviorSanitizer
+        run: |
+          cmake -S libs/aips-signal -B build-asan -DCMAKE_BUILD_TYPE=Debug -DONNXRUNTIME_ROOT=$PWD/third_party/onnxruntime-linux-x64-${ORT_VERSION} \
+            -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer -fno-sanitize-recover=all"
+          cmake --build build-asan -j
+          LD_LIBRARY_PATH=$PWD/third_party/onnxruntime-linux-x64-${ORT_VERSION}/lib ASAN_OPTIONS=detect_leaks=0 ./build-asan/aips_signal_tests ml/models/rul_qr.onnx
+
+  typescript:
+    runs-on: ubuntu-24.04
+    strategy: { matrix: { project: [apps/command, workers/temporal] } }
+    defaults: { run: { working-directory: "${{ matrix.project }}" } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npm ci
+      - run: npm audit --audit-level=moderate
+      - run: npm run build
+      - name: Temporal CLI for the workflow tests (otherwise they are skipped)
+        if: matrix.project == 'workers/temporal'
+        working-directory: .
+        run: curl -fsSL https://github.com/temporalio/cli/releases/download/v1.1.2/temporal_cli_1.1.2_linux_amd64.tar.gz | sudo tar xz -C /usr/local/bin temporal
+      - run: npm test --if-present
+        env: { TEMPORAL_CLI: /usr/local/bin/temporal }
+      - run: npm sbom --sbom-format cyclonedx > sbom.cdx.json
+
+  model:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.13" }
+      - run: pip install numpy==2.5.3 onnx==1.23.2
+      - name: Retrain and check the evaluation gate (coverage 0.65-0.95)
+        run: python ml/train_rul.py
+
+  secrets:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: gitleaks/gitleaks-action@v2
+        env: { GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}" }
+
+  integration:
+    needs: [rust, typescript]
+    runs-on: ubuntu-24.04
+    services:
+      postgres:
+        image: timescale/timescaledb:2.17.2-pg16
+        env: { POSTGRES_USER: aips, POSTGRES_PASSWORD: aips-ci, POSTGRES_DB: aips }
+        ports: ["5432:5432"]
+        options: --health-cmd "pg_isready -U aips" --health-interval 5s --health-retries 20
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y cmake libcurl4-openssl-dev libsasl2-dev zlib1g-dev postgresql-client
+      - run: mkdir -p third_party && curl -fsSL https://github.com/microsoft/onnxruntime/releases/download/v${ORT_VERSION}/onnxruntime-linux-x64-${ORT_VERSION}.tgz | tar xz -C third_party
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: cargo build --release && (cd apps/command && npm ci && npm run build)
+      - run: PGPASSWORD=aips-ci psql -h localhost -U aips -c "create database aips_emergency"
+      - name: Integration, restart and security tests
+        env:
+          DATABASE_URL: postgres://aips:aips-ci@localhost:5432/aips
+          EMERGENCY_DATABASE_URL: postgres://aips:aips-ci@localhost:5432/aips_emergency
+          AIPS_AUTH_MODE: dev
+        run: |
+          mkdir -p .data
+          ./target/release/aips-core > .data/core.log 2>&1 & ./target/release/aips-emergency > .data/emergency.log 2>&1 &
+          timeout 120 bash -c 'until curl -sf localhost:8090/readyz; do sleep 1; done'
+          node tests/integration/api.mjs
+          pkill aips-core; pkill aips-emergency; sleep 1
+          ./target/release/aips-core > .data/core2.log 2>&1 & ./target/release/aips-emergency > .data/emergency2.log 2>&1 &
+          timeout 120 bash -c 'until curl -sf localhost:8090/readyz; do sleep 1; done'
+          node tests/integration/api.mjs http://localhost:8090 http://localhost:8091 after-restart
+          pip install pyjwt cryptography && python3 tests/security/oidc_validation.py target/release/aips-core
+          node tests/integration/concurrency.mjs
+          tests/security/tls13.sh target/release/aips-core
+          # The scripts require the playwright package itself; npx install only fetches browsers.
+          npm i -g playwright@1.49.1 && npx playwright install --with-deps chromium
+          (cd apps/command && npm ci) && NODE_PATH=$(npm root -g) node tests/a11y/axe-audit.mjs
+
+  images:
+    if: github.ref == 'refs/heads/main'
+    needs: [integration, cpp, model, secrets]
+    runs-on: ubuntu-24.04
+    permissions: { contents: read, packages: write, id-token: write, attestations: write }
+    strategy: { matrix: { svc: [core, emergency, workflow] } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with: { registry: ghcr.io, username: "${{ github.actor }}", password: "${{ secrets.GITHUB_TOKEN }}" }
+      - id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: deploy/docker/${{ matrix.svc }}.Dockerfile
+          push: true
+          tags: ghcr.io/${{ github.repository }}/${{ matrix.svc }}:${{ github.sha }}
+          provenance: mode=max
+          sbom: true
+      - name: Scan image
+        uses: aquasecurity/trivy-action@0.28.0
+        with: { image-ref: "ghcr.io/${{ github.repository }}/${{ matrix.svc }}:${{ github.sha }}", exit-code: "1", severity: "CRITICAL,HIGH" }
+      - uses: sigstore/cosign-installer@v3
+      - run: cosign sign --yes ghcr.io/${{ github.repository }}/${{ matrix.svc }}@${{ steps.build.outputs.digest }}
+      - uses: actions/attest-build-provenance@v1
+        with: { subject-name: "ghcr.io/${{ github.repository }}/${{ matrix.svc }}", subject-digest: "${{ steps.build.outputs.digest }}", push-to-registry: true }

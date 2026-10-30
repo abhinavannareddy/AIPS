@@ -1,0 +1,37 @@
+    Fetching advisory database from `https://github.com/RustSec/advisory-db.git`
+      Loaded 1386 security advisories (from /root/.cargo/advisory-db)
+    Updating crates.io index
+    Scanning Cargo.lock for vulnerabilities (347 crate dependencies)
+Crate:     backoff
+Version:   0.4.0
+Warning:   unmaintained
+Title:     `backoff` is unmaintained.
+Date:      2025-03-04
+ID:        RUSTSEC-2025-0012
+URL:       https://rustsec.org/advisories/RUSTSEC-2025-0012
+
+Crate:     instant
+Version:   0.1.13
+Warning:   unmaintained
+Title:     `instant` is unmaintained
+Date:      2024-09-01
+ID:        RUSTSEC-2024-0384
+URL:       https://rustsec.org/advisories/RUSTSEC-2024-0384
+
+Crate:     paste
+Version:   1.0.15
+Warning:   unmaintained
+Title:     paste - no longer maintained
+Date:      2024-10-07
+ID:        RUSTSEC-2024-0436
+URL:       https://rustsec.org/advisories/RUSTSEC-2024-0436
+
+Crate:     rustls-pemfile
+Version:   2.2.0
+Warning:   unmaintained
+Title:     rustls-pemfile is unmaintained
+Date:      2025-11-28
+ID:        RUSTSEC-2025-0134
+URL:       https://rustsec.org/advisories/RUSTSEC-2025-0134
+
+warning: 4 allowed warnings found

@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: aips-workflow, namespace: aips, labels: { app: aips-workflow } }
+spec:
+  replicas: 2   # Temporal workers are safe to scale horizontally
+  selector: { matchLabels: { app: aips-workflow } }
+  template:
+    metadata: { labels: { app: aips-workflow } }
+    spec:
+      securityContext: { runAsNonRoot: true, runAsUser: 1000, seccompProfile: { type: RuntimeDefault } }
+      containers:
+        - name: aips-workflow
+          image: registry.example.invalid/aips/workflow:0.1.0
+          env:
+            - { name: AIPS_CORE_URL, value: http://aips-core.aips.svc:8090 }
+            - { name: AIPS_OIDC_ISSUER, value: https://sso.example.invalid/realms/aips }
+            - { name: AIPS_WORKFLOW_CLIENT_ID, value: aips-workflow }
+            - { name: AIPS_WORKFLOW_CLIENT_SECRET, valueFrom: { secretKeyRef: { name: aips-workflow-oidc, key: client-secret } } }
+            - { name: TEMPORAL_ADDRESS, value: temporal-frontend.temporal.svc:7233 }
+            - { name: TEMPORAL_NAMESPACE, value: aips }
+            - { name: KAFKA_BROKERS, value: kafka-bootstrap.kafka.svc:9092 }
+          resources: { requests: { cpu: 100m, memory: 128Mi }, limits: { cpu: 500m, memory: 512Mi } }
+          securityContext: { allowPrivilegeEscalation: false, readOnlyRootFilesystem: true, capabilities: { drop: [ALL] } }

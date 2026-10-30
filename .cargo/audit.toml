@@ -1,0 +1,8 @@
+# Reviewed advisory exceptions. Each must state why it does not affect AIPS and when to revisit.
+[advisories]
+ignore = [
+  # rsa "Marvin" timing side channel. Only reachable through sqlx-mysql, which is in Cargo.lock but
+  # never compiled (AIPS enables only the postgres driver; no librsa artefact is built).
+  # Revisit if a MySQL driver is ever enabled. Reviewed 2026-10-30.
+  "RUSTSEC-2023-0071",
+]

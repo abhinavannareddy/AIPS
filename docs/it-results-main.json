@@ -1,0 +1,212 @@
+[
+  {
+    "module": "Platform",
+    "name": "health, readiness, liveness and Prometheus metrics",
+    "ok": true,
+    "ms": 12.6
+  },
+  {
+    "module": "Sentinel",
+    "name": "missing credentials are rejected (401)",
+    "ok": true,
+    "ms": 8.5
+  },
+  {
+    "module": "Sentinel",
+    "name": "role-based access is enforced (403)",
+    "ok": true,
+    "ms": 40.6
+  },
+  {
+    "module": "Sentinel",
+    "name": "tenant isolation: a lessor sees only its own aircraft",
+    "ok": true,
+    "ms": 8.3
+  },
+  {
+    "module": "Sentinel",
+    "name": "injection and traversal inputs are handled safely",
+    "ok": true,
+    "ms": 40.4
+  },
+  {
+    "module": "Sentinel",
+    "name": "static UI cannot escape its directory",
+    "ok": true,
+    "ms": 3.4
+  },
+  {
+    "module": "Integrity/Predict",
+    "name": "ingested repeat faults become a graded recurrence hypothesis",
+    "ok": true,
+    "ms": 519.1
+  },
+  {
+    "module": "Workflow",
+    "name": "a case opens automatically and time-to-case is measured",
+    "ok": true,
+    "ms": 3.9
+  },
+  {
+    "module": "Workflow",
+    "name": "assignment, human override and closure reasons",
+    "ok": true,
+    "ms": 263.4
+  },
+  {
+    "module": "Passport",
+    "name": "safety record shows the journey and exports in the documented schema",
+    "ok": true,
+    "ms": 10.1
+  },
+  {
+    "module": "Cross-Flight Memory",
+    "name": "only engineers grade; confirmation needs a justification",
+    "ok": true,
+    "ms": 105.9
+  },
+  {
+    "module": "Cross-Flight Memory",
+    "name": "graph view links hypotheses, events and repairs",
+    "ok": true,
+    "ms": 1.4
+  },
+  {
+    "module": "Integrity",
+    "name": "alerts carry evidence; feedback is recorded",
+    "ok": true,
+    "ms": 120.8
+  },
+  {
+    "module": "Prevent",
+    "name": "stale data yields Insufficient data, never a clear result",
+    "ok": true,
+    "ms": 7.6
+  },
+  {
+    "module": "Prevent",
+    "name": "MEL, documentation and configuration findings are classified",
+    "ok": true,
+    "ms": 4.7
+  },
+  {
+    "module": "Prevent",
+    "name": "review acknowledgement is role-gated and audited",
+    "ok": true,
+    "ms": 121.1
+  },
+  {
+    "module": "Predict",
+    "name": "RUL estimates are ranges, reproducible, and flag the degrading engine",
+    "ok": true,
+    "ms": 7.4
+  },
+  {
+    "module": "Audit",
+    "name": "hash chain is intact and covers human decisions",
+    "ok": true,
+    "ms": 2.5
+  },
+  {
+    "module": "Guardian",
+    "name": "live mode is refused; training is enforced",
+    "ok": true,
+    "ms": 11.2
+  },
+  {
+    "module": "Guardian",
+    "name": "a single weak indicator never notifies anyone",
+    "ok": true,
+    "ms": 7.7
+  },
+  {
+    "module": "Guardian",
+    "name": "dual incapacitation: two channels, unavailable ack does not count, escalation, cancel",
+    "ok": true,
+    "ms": 20617.2
+  },
+  {
+    "module": "Guardian",
+    "name": "ATC message is logged but never transmitted in training",
+    "ok": true,
+    "ms": 45188.1
+  },
+  {
+    "module": "Guardian",
+    "name": "AUT-03 ATC message carries destination weather and alternates; GRD-08 procedure card is a labelled training example",
+    "ok": true,
+    "ms": 45185.7
+  },
+  {
+    "module": "Guardian",
+    "name": "EMG-04 conflicting indicators are shown and never trigger notifications",
+    "ok": true,
+    "ms": 2.8
+  },
+  {
+    "module": "Flight",
+    "name": "flight events detected from flight data, each with limitation and weather context",
+    "ok": true,
+    "ms": 5
+  },
+  {
+    "module": "Flight",
+    "name": "flight view: track, weather, NOTAMs, data quality, post-flight summary",
+    "ok": true,
+    "ms": 4.2
+  },
+  {
+    "module": "Workflow",
+    "name": "WRK-03 alert acknowledgement is attributed, persisted and idempotent",
+    "ok": true,
+    "ms": 820.7
+  },
+  {
+    "module": "Passport",
+    "name": "PSP-02 corrections are versioned, attributed and never overwrite the original",
+    "ok": true,
+    "ms": 292.4
+  },
+  {
+    "module": "Predict",
+    "name": "PRD-06 maintenance effectiveness by ATA chapter and team",
+    "ok": true,
+    "ms": 1.9
+  },
+  {
+    "module": "Command",
+    "name": "CMD-05 CSV reports with correct headers and formula neutralisation",
+    "ok": true,
+    "ms": 6.5
+  },
+  {
+    "module": "Memory",
+    "name": "CFM-05 fleet patterns are k-anonymous aggregates without tail numbers",
+    "ok": true,
+    "ms": 3.1
+  },
+  {
+    "module": "Prevent",
+    "name": "PRV-04 worker escalation endpoint: role-gated, idempotent, audited",
+    "ok": true,
+    "ms": 5
+  },
+  {
+    "module": "Predict",
+    "name": "NFR-10 model registry: hash-verified rollback and re-activation, drift reported",
+    "ok": true,
+    "ms": 416.1
+  },
+  {
+    "module": "Integrity",
+    "name": "DAT-06 ingest rejects an unknown schema version; INT-01 redelivery is idempotent",
+    "ok": true,
+    "ms": 7.9
+  },
+  {
+    "module": "Data",
+    "name": "DAT-03 erasure requires two different administrators and removes the aircraft",
+    "ok": true,
+    "ms": 977.8
+  }
+]

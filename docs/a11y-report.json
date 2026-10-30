@@ -1,0 +1,86 @@
+{
+  "engine": "axe-core",
+  "at": "2026-10-30T07:46:09.677Z",
+  "results": [
+    {
+      "role": "engineer",
+      "screen": "overview",
+      "violations": []
+    },
+    {
+      "role": "engineer",
+      "screen": "fleet",
+      "violations": []
+    },
+    {
+      "role": "engineer",
+      "screen": "aircraft/SE-RAA",
+      "violations": []
+    },
+    {
+      "role": "engineer",
+      "screen": "memory",
+      "violations": []
+    },
+    {
+      "role": "engineer",
+      "screen": "alerts",
+      "violations": []
+    },
+    {
+      "role": "engineer",
+      "screen": "flight",
+      "violations": []
+    },
+    {
+      "role": "engineer",
+      "screen": "reliability",
+      "violations": []
+    },
+    {
+      "role": "engineer",
+      "screen": "preflight",
+      "violations": []
+    },
+    {
+      "role": "engineer",
+      "screen": "cases",
+      "violations": []
+    },
+    {
+      "role": "engineer",
+      "screen": "metrics",
+      "violations": []
+    },
+    {
+      "role": "engineer",
+      "screen": "replay",
+      "violations": []
+    },
+    {
+      "role": "safety_manager",
+      "screen": "guardian",
+      "violations": []
+    },
+    {
+      "role": "safety_manager",
+      "screen": "audit",
+      "violations": []
+    },
+    {
+      "role": "admin",
+      "screen": "admin",
+      "violations": []
+    },
+    {
+      "role": "cabin_crew",
+      "screen": "guardian",
+      "violations": []
+    },
+    {
+      "role": "lessor",
+      "screen": "fleet",
+      "violations": []
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+[package]
+name = "aips-signal-sys"
+version.workspace = true
+edition.workspace = true
+links = "aips_signal"
+build = "build.rs"
+
+[dependencies]
+parking_lot.workspace = true
+
+[build-dependencies]
+cmake = "0.1"
+
+[dev-dependencies]
+proptest.workspace = true

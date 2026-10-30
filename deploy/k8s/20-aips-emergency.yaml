@@ -1,0 +1,50 @@
+# aips-emergency: separate deployment, separate database, local journal on a persistent volume (EMG-01, EMG-05).
+apiVersion: v1
+kind: ServiceAccount
+metadata: { name: aips-emergency, namespace: aips }
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata: { name: aips-emergency, namespace: aips, labels: { app: aips-emergency } }
+spec:
+  serviceName: aips-emergency
+  replicas: 1
+  selector: { matchLabels: { app: aips-emergency } }
+  template:
+    metadata:
+      labels: { app: aips-emergency }
+      annotations:
+        vault.hashicorp.com/agent-inject: "true"
+        vault.hashicorp.com/role: aips-emergency
+        vault.hashicorp.com/agent-inject-secret-env: secret/data/aips/emergency
+        vault.hashicorp.com/agent-inject-template-env: |
+          {{- with secret "secret/data/aips/emergency" -}}{{ range $k, $v := .Data.data }}export {{ $k }}="{{ $v }}"
+          {{ end }}{{- end -}}
+    spec:
+      serviceAccountName: aips-emergency
+      priorityClassName: system-cluster-critical
+      securityContext: { runAsNonRoot: true, runAsUser: 10002, fsGroup: 10002, seccompProfile: { type: RuntimeDefault } }
+      containers:
+        - name: aips-emergency
+          image: registry.example.invalid/aips/emergency:0.1.0
+          command: ["/bin/sh", "-c", ". /vault/secrets/env && exec /usr/local/bin/aips-emergency"]
+          env:
+            - { name: AIPS_ENV, value: production }
+            - { name: AIPS_AUTH_MODE, value: keycloak }
+            - { name: AIPS_OIDC_ISSUER, value: https://sso.example.invalid/realms/aips }
+            - { name: AIPS_EMERGENCY_LIVE_ENABLED, value: "false" }
+            - { name: VAULT_ADDR, value: https://vault.vault.svc:8200 }
+          ports: [{ name: http, containerPort: 8091 }]
+          readinessProbe: { httpGet: { path: /readyz, port: http }, periodSeconds: 5 }
+          livenessProbe: { httpGet: { path: /livez, port: http }, periodSeconds: 10 }
+          resources: { requests: { cpu: 100m, memory: 64Mi }, limits: { cpu: "1", memory: 256Mi } }
+          securityContext: { allowPrivilegeEscalation: false, readOnlyRootFilesystem: true, capabilities: { drop: [ALL] } }
+          volumeMounts: [{ name: journal, mountPath: /var/lib/aips/emergency }]
+  volumeClaimTemplates:
+    - metadata: { name: journal }
+      spec: { accessModes: [ReadWriteOnce], resources: { requests: { storage: 2Gi } } }
+---
+apiVersion: v1
+kind: Service
+metadata: { name: aips-emergency, namespace: aips }
+spec: { selector: { app: aips-emergency }, ports: [{ name: http, port: 8091, targetPort: http }] }

@@ -1,0 +1,59 @@
+# aips-core: stateless API + analysis. Secrets are injected by the Vault Agent Injector.
+apiVersion: v1
+kind: ServiceAccount
+metadata: { name: aips-core, namespace: aips }
+---
+apiVersion: v1
+kind: ConfigMap
+metadata: { name: aips-core, namespace: aips }
+data:
+  AIPS_ENV: production
+  AIPS_AUTH_MODE: keycloak
+  AIPS_OIDC_ISSUER: https://sso.example.invalid/realms/aips
+  AIPS_OIDC_AUDIENCE: aips-api
+  AIPS_WORKFLOW_ENGINE: temporal
+  VAULT_ADDR: https://vault.vault.svc:8200
+  OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector.observability.svc:4318
+  AIPS_UI_KEYCLOAK_URL: https://sso.example.invalid
+  AIPS_UI_EMERGENCY_API: https://guardian.example.invalid
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: aips-core, namespace: aips, labels: { app: aips-core } }
+spec:
+  replicas: 1   # single writer of the analysis snapshot in Phase 0 (see ENGINEERING_REPORT: residual risk R3)
+  strategy: { type: Recreate }
+  selector: { matchLabels: { app: aips-core } }
+  template:
+    metadata:
+      labels: { app: aips-core }
+      annotations:
+        vault.hashicorp.com/agent-inject: "true"
+        vault.hashicorp.com/role: aips-core
+        vault.hashicorp.com/agent-inject-secret-env: secret/data/aips/core
+        vault.hashicorp.com/agent-inject-template-env: |
+          {{- with secret "secret/data/aips/core" -}}{{ range $k, $v := .Data.data }}export {{ $k }}="{{ $v }}"
+          {{ end }}{{- end -}}
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8090"
+    spec:
+      serviceAccountName: aips-core
+      automountServiceAccountToken: true
+      securityContext: { runAsNonRoot: true, runAsUser: 10001, seccompProfile: { type: RuntimeDefault } }
+      containers:
+        - name: aips-core
+          image: registry.example.invalid/aips/core:0.1.0
+          command: ["/bin/sh", "-c", ". /vault/secrets/env && exec /usr/local/bin/aips-core"]
+          envFrom: [{ configMapRef: { name: aips-core } }]
+          ports: [{ name: http, containerPort: 8090 }]
+          readinessProbe: { httpGet: { path: /readyz, port: http }, periodSeconds: 5 }
+          livenessProbe: { httpGet: { path: /livez, port: http }, periodSeconds: 10, failureThreshold: 3 }
+          startupProbe: { httpGet: { path: /readyz, port: http }, periodSeconds: 2, failureThreshold: 60 }
+          resources: { requests: { cpu: 500m, memory: 512Mi }, limits: { cpu: "2", memory: 1Gi } }
+          securityContext: { allowPrivilegeEscalation: false, readOnlyRootFilesystem: true, capabilities: { drop: [ALL] } }
+      terminationGracePeriodSeconds: 30
+---
+apiVersion: v1
+kind: Service
+metadata: { name: aips-core, namespace: aips }
+spec: { selector: { app: aips-core }, ports: [{ name: http, port: 8090, targetPort: http }] }

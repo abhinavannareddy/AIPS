@@ -1,0 +1,32 @@
+[
+  {
+    "module": "Reliability",
+    "name": "human decisions survive a core restart (PostgreSQL)",
+    "ok": true,
+    "ms": 76.1
+  },
+  {
+    "module": "Reliability",
+    "name": "corrections, acknowledgements and erasure survive restart",
+    "ok": true,
+    "ms": 6.1
+  },
+  {
+    "module": "Predict",
+    "name": "NFR-10 model activation persists across restart",
+    "ok": true,
+    "ms": 146.5
+  },
+  {
+    "module": "Reliability",
+    "name": "audit chain reloads intact after restart",
+    "ok": true,
+    "ms": 2.4
+  },
+  {
+    "module": "Reliability",
+    "name": "emergency journal recovers after a service restart",
+    "ok": true,
+    "ms": 8.6
+  }
+]

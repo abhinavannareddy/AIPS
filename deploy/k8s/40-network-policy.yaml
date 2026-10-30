@@ -1,0 +1,44 @@
+# Default deny; allow only the flows AIPS needs (zero-trust baseline).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: { name: default-deny, namespace: aips }
+spec: { podSelector: {}, policyTypes: [Ingress, Egress] }
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: { name: aips-core, namespace: aips }
+spec:
+  podSelector: { matchLabels: { app: aips-core } }
+  policyTypes: [Ingress, Egress]
+  ingress:
+    - from: [{ namespaceSelector: { matchLabels: { kubernetes.io/metadata.name: ingress } } }, { podSelector: { matchLabels: { app: aips-workflow } } }]
+      ports: [{ port: 8090 }]
+    # Prometheus scrapes /metrics (pod annotations prometheus.io/scrape); same namespace as the collector.
+    - from: [{ namespaceSelector: { matchLabels: { kubernetes.io/metadata.name: observability } } }]
+      ports: [{ port: 8090 }]
+  egress:
+    - to: [{ namespaceSelector: {} }]
+      ports: [{ port: 5432 }, { port: 7687 }, { port: 9092 }, { port: 8200 }, { port: 443 }, { port: 4318 }, { port: 53, protocol: UDP }, { port: 53, protocol: TCP }]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: { name: aips-emergency, namespace: aips }
+spec:
+  podSelector: { matchLabels: { app: aips-emergency } }
+  policyTypes: [Ingress, Egress]
+  ingress:
+    - from: [{ namespaceSelector: { matchLabels: { kubernetes.io/metadata.name: ingress } } }]
+      ports: [{ port: 8091 }]
+  egress:
+    - to: [{ namespaceSelector: {} }]
+      ports: [{ port: 5432 }, { port: 8200 }, { port: 443 }, { port: 53, protocol: UDP }, { port: 53, protocol: TCP }]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: { name: aips-workflow, namespace: aips }
+spec:
+  podSelector: { matchLabels: { app: aips-workflow } }
+  policyTypes: [Egress]
+  egress:
+    - to: [{ namespaceSelector: {} }]
+      ports: [{ port: 8090 }, { port: 7233 }, { port: 9092 }, { port: 443 }, { port: 53, protocol: UDP }, { port: 53, protocol: TCP }]
