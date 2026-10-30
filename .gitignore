@@ -11,3 +11,5 @@ build-asan/
 __pycache__/
 *.pyc
 *.tsbuildinfo
+
+.claude/scheduled_tasks.lock
