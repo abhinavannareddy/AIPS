@@ -135,7 +135,7 @@ jobs:
           provenance: mode=max
           sbom: true
       - name: Scan image
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         # Fail on any HIGH/CRITICAL with a released fix; unpatched base-OS CVEs are reported but cannot be fixed here.
         with: { image-ref: "ghcr.io/${{ github.repository }}/${{ matrix.svc }}:${{ github.sha }}", exit-code: "1", severity: "CRITICAL,HIGH", ignore-unfixed: true }
       - uses: sigstore/cosign-installer@v3
