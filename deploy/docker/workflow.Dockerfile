@@ -11,5 +11,7 @@ WORKDIR /app
 COPY --from=build /app/node_modules node_modules
 COPY --from=build /app/dist dist
 COPY --from=build /app/package.json .
+# The worker never runs npm; dropping the bundled CLI removes its dependency CVEs from the image.
+RUN rm -rf /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/corepack /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack
 USER node
 ENTRYPOINT ["node", "dist/worker.js"]

@@ -14,7 +14,7 @@ jobs:
   rust:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - run: sudo apt-get update && sudo apt-get install -y cmake libcurl4-openssl-dev libsasl2-dev zlib1g-dev
       - run: mkdir -p third_party && curl -fsSL https://github.com/microsoft/onnxruntime/releases/download/v${ORT_VERSION}/onnxruntime-linux-x64-${ORT_VERSION}.tgz | tar xz -C third_party
       - uses: dtolnay/rust-toolchain@stable
@@ -24,13 +24,13 @@ jobs:
       - run: cargo test --release --workspace
       - run: cargo install cargo-audit --locked && cargo audit
       - run: cargo install cargo-cyclonedx --locked && cargo cyclonedx --format json
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with: { name: sbom-rust, path: "**/*.cdx.json" }
 
   cpp:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - run: mkdir -p third_party && curl -fsSL https://github.com/microsoft/onnxruntime/releases/download/v${ORT_VERSION}/onnxruntime-linux-x64-${ORT_VERSION}.tgz | tar xz -C third_party
       - name: Build and test with AddressSanitizer and UndefinedBehaviorSanitizer
         run: |
@@ -44,8 +44,8 @@ jobs:
     strategy: { matrix: { project: [apps/command, workers/temporal] } }
     defaults: { run: { working-directory: "${{ matrix.project }}" } }
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with: { node-version: 22 }
       - run: npm ci
       - run: npm audit --audit-level=moderate
@@ -61,8 +61,8 @@ jobs:
   model:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with: { python-version: "3.13" }
       - run: pip install numpy==2.5.3 onnx==1.23.2
       - name: Retrain and check the evaluation gate (coverage 0.65-0.95)
@@ -71,7 +71,7 @@ jobs:
   secrets:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with: { fetch-depth: 0 }
       # Scan the whole history with the CLI: the action diffs `before^..after`, which breaks on a root commit.
       - run: docker run --rm -v "$PWD:/repo" ghcr.io/gitleaks/gitleaks:v8.30.1 git /repo --redact
@@ -86,11 +86,11 @@ jobs:
         ports: ["5432:5432"]
         options: --health-cmd "pg_isready -U aips" --health-interval 5s --health-retries 20
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - run: sudo apt-get update && sudo apt-get install -y cmake libcurl4-openssl-dev libsasl2-dev zlib1g-dev postgresql-client
       - run: mkdir -p third_party && curl -fsSL https://github.com/microsoft/onnxruntime/releases/download/v${ORT_VERSION}/onnxruntime-linux-x64-${ORT_VERSION}.tgz | tar xz -C third_party
       - uses: dtolnay/rust-toolchain@stable
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with: { node-version: 22 }
       - run: cargo build --release && (cd apps/command && npm ci && npm run build)
       - run: PGPASSWORD=aips-ci psql -h localhost -U aips -c "create database aips_emergency"
@@ -122,7 +122,7 @@ jobs:
     permissions: { contents: read, packages: write, id-token: write, attestations: write }
     strategy: { matrix: { svc: [core, emergency, workflow] } }
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: docker/login-action@v3
         with: { registry: ghcr.io, username: "${{ github.actor }}", password: "${{ secrets.GITHUB_TOKEN }}" }
       - id: build
@@ -136,7 +136,8 @@ jobs:
           sbom: true
       - name: Scan image
         uses: aquasecurity/trivy-action@0.28.0
-        with: { image-ref: "ghcr.io/${{ github.repository }}/${{ matrix.svc }}:${{ github.sha }}", exit-code: "1", severity: "CRITICAL,HIGH" }
+        # Fail on any HIGH/CRITICAL with a released fix; unpatched base-OS CVEs are reported but cannot be fixed here.
+        with: { image-ref: "ghcr.io/${{ github.repository }}/${{ matrix.svc }}:${{ github.sha }}", exit-code: "1", severity: "CRITICAL,HIGH", ignore-unfixed: true }
       - uses: sigstore/cosign-installer@v3
       - run: cosign sign --yes ghcr.io/${{ github.repository }}/${{ matrix.svc }}@${{ steps.build.outputs.digest }}
       - uses: actions/attest-build-provenance@v1
